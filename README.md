@@ -5,17 +5,16 @@
 
 ```txt
 .
-├ ─docker-compose.yml
-├ o Dockerfile
+├──docker-compose.yml
+├─ Dockerfile
 ├── app.py
 └── templates
-    ├── hello.html
-    └── index.ht
+    └── indexml
 ```
 
 ### 各種ファイルについて解説
 
-#### `app.py`
+#### `app.py` コンテナ側のポート5000番でlisten
 
 ```python
 from flask import Flask, render_template
@@ -33,41 +32,53 @@ if __name__ == '__main__':
 #### `templates/index.html`
 
 ```html
-<html>
-<title>docker demo flask</title>
-<head></head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask App</title>
+</head>
 <body>
-トップページです。
+    <h1>Welcome to my Flask app!</h1>
+    <p>This is a simple Flask application running inside a Docker container.</p>
 </body>
-</html>
+</html>>
 ```
 
 
 #### `Dockerfile` (これをベースにイメージからビルド、コンテナを作成する)
 
 ```txt
-# python 3.12 をベースにDockerイメージを作成
+# ベースとなるイメージとして Python 3.12 を使用
 FROM python:3.12
 
 # 作業ディレクトリを指定
 WORKDIR /app
 
-# カレントディレクトリのファイルをDockerコンテナの｢/app｣ ディレクトリにコピー
-ADD . /app
+# ホストのカレントディレクトリの内容を Docker コンテナの /app ディレクトリにコピー
+COPY . /app
 
-# Flaskをインストール
+# Flask をインストール
 RUN pip install Flask
 
-# 外部に公開するポートを指定
-EXPOSE 8000
+# Flask が使用するポートを指定（デフォルトは 5000）
+EXPOSE 5000
 
-# コンテナの実行コマンドを指定
+# コンテナ起動時に実行するコマンドを指定
 CMD ["python", "app.py"]
 ```
 
 #### `docker-compose.yaml` (これを用いることで、複数のコンテナを同時に立ち上げたりできる)
 
 ```yaml
+version: '3.8'  # Docker Compose のバージョン
 
-
+services:
+  flask-app:  # サービス名（任意）
+    build: .  # カレントディレクトリの Dockerfile を使用してビルド
+    ports:
+      - "5000:5000"  # ホストのポート5000をコンテナのポート5000にマッピング
+    volumes:
+      - .:/app  # ホストのカレントディレクトリをコンテナの /app にマウント
 ```
