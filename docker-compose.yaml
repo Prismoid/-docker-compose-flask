@@ -1,0 +1,9 @@
+version: '3.8'  # Docker Compose のバージョン
+
+services:
+  flask-app:  # サービス名（任意）
+    build: .  # カレントディレクトリの Dockerfile を使用してビルド
+    ports:
+      - "5000:5000"  # ホストのポート5000をコンテナのポート5000にマッピング
+    volumes:
+      - .:/app  # ホストのカレントディレクトリをコンテナの /app にマウント
